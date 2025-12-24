@@ -1,0 +1,27 @@
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: better-auth@1.4.7
+npm error Found: @prisma/client@6.19.1
+npm error node_modules/@prisma/client
+npm error   @prisma/client@"^6.19.1" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peerOptional @prisma/client@"^5.22.0" from better-auth@1.4.7
+npm error node_modules/better-auth
+npm error   better-auth@"^1.4.7" from the root project
+npm error
+npm error Conflicting peer dependency: @prisma/client@5.22.0
+npm error node_modules/@prisma/client
+npm error   peerOptional @prisma/client@"^5.22.0" from better-auth@1.4.7
+npm error   node_modules/better-auth
+npm error     better-auth@"^1.4.7" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/manavkamdar/.npm/_logs/2025-12-24T04_51_20_462Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/manavkamdar/.npm/_logs/2025-12-24T04_51_20_462Z-debug-0.log

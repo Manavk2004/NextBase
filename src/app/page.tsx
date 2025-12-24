@@ -17,10 +17,17 @@ const Page =  () => {
   const create = useMutation(trpc.createWorkFlow.mutationOptions({
     onSuccess: () => {
       toast.success("Job queued")
+    },
+    onError: () => {
+      toast.error("Failed")
     }
   }))
 
-  const testAi = useMutation(trpc.testAi.mutationOptions())
+  const testAi = useMutation(trpc.testAi.mutationOptions({
+    onSuccess: () => {
+      toast.success("SUccess")
+    }
+  }))
 
   return (
     <div className='flex flex-col gap-5 justify-center items-center min-h-screen'>
