@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar"
 import { authClient } from "@/lib/auth-client"
+import { useSubscription, useHasActiveSubscription } from "@/app/subscriptions/hooks/use-subscription"
 
 const menuItems = [
     {
@@ -32,6 +33,7 @@ const menuItems = [
 const AppSidebar = () => {
     const router = useRouter()
     const pathname = usePathname()
+    const { hasActiveSubscription, isLoading } = useHasActiveSubscription()
 
 
   return (
@@ -73,13 +75,16 @@ const AppSidebar = () => {
         </SidebarContent>
         <SidebarFooter>
             <SidebarMenu>
+                {!hasActiveSubscription && !isLoading && (
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Upgrade to Pro" className="gap-x-4 h-10 px-4" onClick={() => authClient.checkout({ slug: "Nextbase-Pro" })}>
+                            <StarIcon className="h-4 w-4" />
+                            <span>Upgrade to Pro</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                )}
                 <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Upgrade to Pro" className="gap-x-4 h-10 px-4" onClick={() => {}}>
-                        <StarIcon className="h-4 w-4" />
-                        <span>Upgrade to Pro</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>       
-                <SidebarMenuItem>
+                    
                     <SidebarMenuButton tooltip="Upgrade to Pro" className="gap-x-4 h-10 px-4" onClick={() => {}}>
                         <CreditCardIcon className="h-4 w-4" />
                         <span>Billing Portal</span>
