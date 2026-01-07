@@ -1,9 +1,30 @@
 "use client"
 import { useCreateWorkflow, useSuspenseWorkFlows } from "../hooks/use-workflows"
-import { EntityContainer, EntityHeader } from "@/components/entity-components";
+import { EntityContainer, EntityHeader, EntitySearch } from "@/components/entity-components";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 import { router } from "better-auth/api";
 import { useRouter } from "next/navigation";
+import { useWorkflowsParams } from "../hooks/use-workflows-params";
+import { useEntitySearch } from "../hooks/use-entity-search";
+
+
+export const WorkflowsSearch = () => {
+    const [ params, setParams ] = useWorkflowsParams();
+
+
+    const { searchValue, onSearchChange } = useEntitySearch({
+        params,
+        setParams,
+    })
+
+    return(
+        <EntitySearch
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder="Search workflows"
+        />
+    )
+}
 
 export const WorkflowsList = () => {
     const workflows = useSuspenseWorkFlows();
@@ -50,7 +71,7 @@ export const WorkflowsHeader = ({ disabled }: { disabled?: boolean }) => {
 
 export const WorkflowsContainer = ({ children }: { children: React.ReactNode }) => {
     return (
-        <EntityContainer header={<WorkflowsHeader />} search={<></>} pagination={<></>}>
+        <EntityContainer header={<WorkflowsHeader />} search={<WorkflowsSearch />} pagination={<></>}>
             {children}
         </EntityContainer>
     )
