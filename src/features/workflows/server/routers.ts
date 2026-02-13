@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import { PAGINATION } from "@/config/constants";
 import { NodeType } from "@/generated/prisma/enums";
 import prisma from "@/lib/db";
@@ -69,6 +68,8 @@ export const workflowsRouter = createTRPCRouter({
                 where: { id, userId: ctx.auth.user.id }
             })
 
+
+            //$transaction is an all or nothing type. Meaning changes will only occur if everything succeeds
             return await prisma.$transaction(async (tx) => {
                 await tx.node.deleteMany({
                     where: { workflowId: id }
@@ -80,10 +81,13 @@ export const workflowsRouter = createTRPCRouter({
                         workflowId: id,
                         name: node.type || "unknown",
                         type: node.type as NodeType,
-                        position: node.data || {},
+                        position: node.position,
+                        data: node.data || {},
                     }))
                 })
 
+
+                //Create connections
                 await tx.connection.createMany({
                     data: edges.map((edge) => ({
                         workflowId: id,
@@ -94,7 +98,7 @@ export const workflowsRouter = createTRPCRouter({
                     }))
                 })
 
-                await tx.workflow.updateMany({
+                await tx.workflow.update({
                     where: { id },
                     data: { updatedAt: new Date()}
                 })
@@ -118,7 +122,7 @@ export const workflowsRouter = createTRPCRouter({
         const nodes: Node[] = workflow.nodes.map((node) => ({
             id: node.id,
             type: node.type,
-            position: node.position as { x: number, y: number },
+            position: { x: 0, y: 0, ...(node.position as { x: number, y: number }) },
             data: (node.data as Record<string, unknown>) || {}
         }))
 
