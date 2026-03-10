@@ -1,5 +1,4 @@
 import { Editor, EditorError, EditorLoading } from '@/features/editor/components/editor'
-import { WorkflowsError, WorkflowsList } from '@/features/workflows/components/workflows'
 import { prefetchWorkflow } from '@/features/workflows/server/prefetch'
 import { requireAuth } from '@/lib/auth.utils'
 import { HydrateClient } from '@/trpc/server'

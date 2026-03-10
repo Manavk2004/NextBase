@@ -2,7 +2,7 @@ import type { ComponentProps, HTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 import { NodeStatus } from "./node-status-indicator";
-import { CheckCircleIcon, Loader2Icon, XCircle, XCircleIcon } from "lucide-react";
+import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
 interface BaseNodeProps extends HTMLAttributes<HTMLDivElement>{
   status?: NodeStatus;

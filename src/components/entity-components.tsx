@@ -95,9 +95,10 @@ interface EntitySearchProps {
 
 
 export const EntitySearch = ({
-    value, 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    value,
     onChange,
-    placeholder = "Search" 
+    placeholder = "Search"
 }: EntitySearchProps) => {
     return(
         <div className='relative ml-auto'>
@@ -258,7 +259,8 @@ export function EntityList<T>({
 
     return(
         <div className={cn(
-            "flex flex-col gap-y-4"
+            "flex flex-col gap-y-4",
+            className
         )}>
             {items.map((item, index) => (
                 <div key={getKey ? getKey(item, index) : index}>

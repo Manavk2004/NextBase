@@ -7,7 +7,7 @@ import { useSuspenseWorkflow, useUpdateWorkflow, useUpdateWorkflowName } from "@
 import { useAtomValue } from "jotai"
 import { SaveIcon } from "lucide-react"
 import Link from "next/link"
-import { use, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { editoratom } from "../store/atoms"
 
 export const EditorSaveButton = ({ workflowId }: { workflowId: string }) => {

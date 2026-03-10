@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar"
 import { authClient } from "@/lib/auth-client"
-import { useSubscription, useHasActiveSubscription } from "@/app/subscriptions/hooks/use-subscription"
+import { useHasActiveSubscription } from "@/app/subscriptions/hooks/use-subscription"
 
 const menuItems = [
     {

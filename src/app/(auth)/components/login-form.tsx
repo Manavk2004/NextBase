@@ -8,9 +8,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
 import { authClient } from "@/lib/auth-client"
 
 
@@ -20,6 +19,26 @@ const loginSchema = z.object({
 })
 
 type LoginFormValues = z.infer<typeof loginSchema>
+
+function getReadableAuthError(error: { message?: string; statusText?: string; status?: number }): string {
+    const raw = error.message || ""
+
+    if (raw.includes("Invalid email or password") || raw.includes("INVALID_PASSWORD") || raw.includes("INVALID_EMAIL_OR_PASSWORD")) {
+        return "Invalid email or password."
+    }
+    if (raw.includes("User not found") || raw.includes("user_not_found")) {
+        return "No account found with this email."
+    }
+    if (raw.includes("too many requests") || error.status === 429) {
+        return "Too many attempts. Please try again later."
+    }
+
+    if (raw.includes("{") && raw.includes("}")) {
+        return "Something went wrong. Please try again."
+    }
+
+    return raw || error.statusText || "Login failed. Please try again."
+}
 
 export function LoginForm(){
     const router = useRouter()
@@ -42,7 +61,7 @@ export function LoginForm(){
                 router.push("/")
             },
             onError: (ctx) => {
-                toast.error(ctx.error.message)
+                toast.error(getReadableAuthError(ctx.error))
             }
         })
     }
