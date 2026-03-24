@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
+import { getReadableErrorMessage } from "@/lib/error-utils"
 
 
 const registerSchema = z.object({
@@ -23,30 +24,6 @@ const registerSchema = z.object({
 })
 
 type RegisterFormValues = z.infer<typeof registerSchema>
-
-function getReadableAuthError(error: { message?: string; statusText?: string; status?: number }): string {
-    const raw = error.message || ""
-
-    if (raw.includes("User already exists") || raw.includes("external ID cannot be updated")) {
-        return "An account with this email already exists. Please log in instead."
-    }
-    if (raw.includes("Invalid email or password") || raw.includes("INVALID_PASSWORD")) {
-        return "Invalid email or password."
-    }
-    if (raw.includes("too many requests") || error.status === 429) {
-        return "Too many attempts. Please try again later."
-    }
-    if (raw.includes("password") && raw.includes("short")) {
-        return "Password is too short. Please use at least 8 characters."
-    }
-
-    // If it looks like a raw JSON/API dump, show a generic message
-    if (raw.includes("{") && raw.includes("}")) {
-        return "Something went wrong. Please try again."
-    }
-
-    return raw || error.statusText || "Sign up failed. Please try again."
-}
 
 export function RegisterForm(){
     const router = useRouter()
@@ -73,7 +50,7 @@ export function RegisterForm(){
                     router.push("/")
                 },
                 onError: (ctx) => {
-                    toast.error(getReadableAuthError(ctx.error))
+                    toast.error(getReadableErrorMessage(ctx.error.message, "Sign up failed. Please try again."))
                 }
             }
         )

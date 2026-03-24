@@ -1,4 +1,5 @@
 import { useTRPC } from "@/trpc/client"
+import { getReadableErrorMessage } from "@/lib/error-utils";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useWorkflowsParams } from "./use-workflows-params";
@@ -21,7 +22,7 @@ export const useCreateWorkflow = () => {
             queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}))
         },
         onError: (error) => {
-            toast.error(`Failed to create workflow: ${error.message}`)
+            toast.error(getReadableErrorMessage(error, "Failed to create workflow."))
         }
     }))
 }
@@ -42,7 +43,7 @@ export const useRemoveWorkflow = () => {
                 )
             },
             onError: (error) => {
-                toast.error(`Failed to remove workflow: ${error.message}`)
+                toast.error(getReadableErrorMessage(error, "Failed to remove workflow."))
             }
         })
     )
@@ -67,11 +68,29 @@ export const useUpdateWorkflowName = () => {
             )
         },
         onError: (error) => {
-            toast.error(`Failed to update workflow: ${error.message}`)
+            toast.error(getReadableErrorMessage(error, "Failed to update workflow."))
         }
     }))
 }
 
+
+/**
+ * Hook to execute a workflow
+ */
+export const useExecuteWorkflow = () => {
+    const trpc = useTRPC();
+
+    return useMutation(
+        trpc.workflows.execute.mutationOptions({
+            onSuccess: (data) => {
+                toast.success(`Workflow "${data.name}" executed`);
+            },
+            onError: (error) => {
+                toast.error(`Failed to execute workflow: ${error.message}`);
+            },
+        }),
+    );
+};
 
 export const useUpdateWorkflow = () => {
     const queryClient = useQueryClient()
@@ -86,7 +105,7 @@ export const useUpdateWorkflow = () => {
             )
         },
         onError: (error) => {
-            toast.error(`Failed to save workflow: ${error.message}`)
+            toast.error(getReadableErrorMessage(error, "Failed to save workflow."))
         }
     }))
 }

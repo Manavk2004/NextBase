@@ -1,24 +1,18 @@
+import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
 
 export const useSubscription = () => {
-    return useQuery({
-        queryKey: ["subscription"],
-        queryFn: async () => {
-            const { data } = await authClient.customer.state()
-            return data
-        }
-    })
+    const trpc = useTRPC();
+
+    return useQuery(trpc.subscriptions.getState.queryOptions())
 }
 
 export const useHasActiveSubscription = () => {
-    const { data: customerState, isLoading, ...rest } = useSubscription()
-
-    const hasActiveSubscription = customerState?.activeSubscriptions && customerState?.activeSubscriptions.length > 0;
+    const { data, isLoading, ...rest } = useSubscription()
 
     return {
-        hasActiveSubscription,
-        subscription: customerState?.activeSubscriptions?.[0],
+        hasActiveSubscription: data?.hasActiveSubscription ?? false,
+        subscription: data?.activeSubscriptions?.[0],
         isLoading,
         ...rest
     }

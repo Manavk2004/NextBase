@@ -50,14 +50,14 @@ export const HttpRequestDialog = ({
     open,
     onOpenChange,
     onSubmit,
-    defaultValues
+    defaultValues = {},
 }: Props) => {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             endpoint: defaultValues?.endpoint || "",
-            method: defaultValues.method || "",
+            method: defaultValues.method ?? "GET",
             body: defaultValues.body || ""
         }
     }) 
@@ -65,12 +65,12 @@ export const HttpRequestDialog = ({
     useEffect(() => {
         if(open) {
             form.reset({
-                endpoint: defaultEndpoint,
-                method: defaultMethod,
-                body: defaultBody
+                endpoint: defaultValues?.endpoint || "",
+                method: defaultValues?.method ?? "GET",
+                body: defaultValues?.body || ""
             })
         }
-    }, [open, defaultEndpoint, defaultMethod, defaultBody, form])
+    }, [open, defaultValues, form])
 
 
     const watchMethod = form.watch("method")

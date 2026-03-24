@@ -16,7 +16,8 @@ export const auth = betterAuth({
     plugins: [
         polar({
             client: polarClient,
-            createCustomerOnSignUp: false,
+            createCustomerOnSignUp: true,
+            enableCustomerSessionSync: true,
             use: [
                 checkout({
                     products: [
