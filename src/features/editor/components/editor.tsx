@@ -11,6 +11,7 @@ import { ExecuteWorkflowButton } from "./execute-workflow-button";
 import { NodeType } from "@/generated/prisma/enums";
 import { useSetAtom } from "jotai";
 import { editoratom } from "../store/atoms";
+import { useNodeStatusSubscription } from "@/features/executions/hooks/use-node-status";
 
 export const EditorLoading = () => {
     return <LoadingView message="Loading editor..."/>
@@ -27,6 +28,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
     const { data: workflow } = useSuspenseWorkflow(workflowId)
 
     const setEditor = useSetAtom(editoratom);
+    useNodeStatusSubscription(workflowId);
 
     const [nodes, setNodes] = useState<Node[]>(workflow.nodes);
     const [edges, setEdges] = useState<Edge[]>(workflow.edges);

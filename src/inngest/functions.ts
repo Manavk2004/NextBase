@@ -6,6 +6,7 @@ import prisma from "@/lib/db";
 import { topologicalSort } from "./utils";
 import { NodeType } from "@/generated/prisma/enums";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
+import { workflowExecutionChannel } from "./channels";
 
 
 const google = createGoogleGenerativeAI()
@@ -36,7 +37,7 @@ export const execute = inngest.createFunction(
 export const executeWorkflow = inngest.createFunction(
   { id: "execute-workflow" },
   { event: "workflows/execute.workflow" },
-  async ({ event, step }) => {
+  async ({ event, step, publish }) => {
     const workflowId = event.data.workflowId;
 
     if (!workflowId) {
@@ -64,11 +65,43 @@ export const executeWorkflow = inngest.createFunction(
       const nodeData = (node.data as Record<string, unknown>) || {};
       const variableName = (nodeData.variableName as string) || node.id;
 
-      const result = await step.run(`execute-node-${node.id}`, async () => {
-        return executor(nodeData, context);
+      await step.run(`publish-loading-${node.id}`, async () => {
+        await publish(
+          workflowExecutionChannel(workflowId)["node-status"]({
+            nodeId: node.id,
+            status: "loading",
+          })
+        );
       });
 
-      context = { ...context, [variableName]: result };
+      try {
+        const result = await step.run(`execute-node-${node.id}`, async () => {
+          return executor(nodeData, context);
+        });
+
+        context = { ...context, [variableName]: result };
+
+        await step.run(`publish-success-${node.id}`, async () => {
+          await publish(
+            workflowExecutionChannel(workflowId)["node-status"]({
+              nodeId: node.id,
+              status: "success",
+            })
+          );
+        });
+      } catch (error) {
+        await step.run(`publish-error-${node.id}`, async () => {
+          await publish(
+            workflowExecutionChannel(workflowId)["node-status"]({
+              nodeId: node.id,
+              status: "error",
+            })
+          );
+        });
+        throw new NonRetriableError(
+          `Node ${node.id} failed: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
     }
 
     return { context };
