@@ -16,13 +16,25 @@ export function useNodeStatusSubscription(workflowId: string) {
   }, [workflowId]);
 
   const refreshToken = useCallback(
-    () => getNodeStatusToken(workflowId),
+    async () => {
+      const token = await getNodeStatusToken(workflowId);
+      if (!token) {
+        throw new Error("Token unavailable");
+      }
+      return token;
+    },
     [workflowId]
   );
 
-  const { data } = useInngestSubscription({
+  const { data, error } = useInngestSubscription({
     refreshToken,
   });
+
+  useEffect(() => {
+    if (error) {
+      console.warn("Node status subscription error:", error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (data.length <= processedCount.current) return;

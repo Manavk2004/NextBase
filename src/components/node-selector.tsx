@@ -30,6 +30,12 @@ const triggerNodes: NodeTypeOption[] = [
         label: "Google Form Trigger",
         description: "Triggers the workflow when a Google Form is submitted",
         icon: "/logos/google.svg"
+    },
+    {
+        type: NodeType.STRIPE_TRIGGER,
+        label: "Stripe Trigger",
+        description: "Triggers the workflow when a Stripe event occurs",
+        icon: "/logos/stripe.svg"
     }
 ]
 
@@ -78,6 +84,18 @@ export function NodeSelector({
 
             if(Boolean(hasGoogleFormTrigger)){
                 toast.error("Only one Google Form trigger is allowed per workflow")
+                return
+            }
+        }
+
+        if(selection.type === NodeType.STRIPE_TRIGGER){
+            const nodes = getNodes()
+            const hasStripeTrigger = nodes.some(
+                (node) => node.type === NodeType.STRIPE_TRIGGER
+            )
+
+            if(Boolean(hasStripeTrigger)){
+                toast.error("Only one Stripe trigger is allowed per workflow")
                 return
             }
         }

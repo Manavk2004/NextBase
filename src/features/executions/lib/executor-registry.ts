@@ -16,6 +16,10 @@ const googleFormTriggerExecutor: NodeExecutor = async (_nodeData, context) => {
   return { triggered: true, formData: context.formData ?? {} };
 };
 
+const stripeTriggerExecutor: NodeExecutor = async (_nodeData, context) => {
+  return { triggered: true, stripeEvent: context.stripeEvent ?? {} };
+};
+
 const initialExecutor: NodeExecutor = async () => {
   return {};
 };
@@ -63,6 +67,7 @@ const httpRequestExecutor: NodeExecutor = async (nodeData, context) => {
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
   [NodeType.GOOGLE_FORM_TRIGGER]: googleFormTriggerExecutor,
+  [NodeType.STRIPE_TRIGGER]: stripeTriggerExecutor,
   [NodeType.INITIAL]: initialExecutor,
   [NodeType.HTTP_REQUEST]: httpRequestExecutor,
 };

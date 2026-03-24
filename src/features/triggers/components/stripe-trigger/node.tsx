@@ -1,12 +1,12 @@
 import { NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseTriggerNode } from "../base-trigger-node";
-import { GoogleFormTriggerDialog } from "./dialog";
+import { StripeTriggerDialog } from "./dialog";
 import { useNodeStatus } from "@/features/executions/hooks/use-node-status";
 import { useAtomValue } from "jotai";
 import { workflowIdAtom } from "@/features/editor/store/atoms";
 
-export const GoogleFormTriggerNode = memo((props: NodeProps) => {
+export const StripeTriggerNode = memo((props: NodeProps) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const nodeStatus = useNodeStatus(props.id);
     const workflowId = useAtomValue(workflowIdAtom);
@@ -15,7 +15,7 @@ export const GoogleFormTriggerNode = memo((props: NodeProps) => {
         || (typeof window !== "undefined" ? window.location.origin : "");
 
     const webhookUrl = workflowId
-        ? `${baseUrl}/api/webhooks/google-form/${workflowId}`
+        ? `${baseUrl}/api/webhooks/stripe/${workflowId}`
         : "";
 
     const truncatedUrl = webhookUrl.length > 40
@@ -26,15 +26,15 @@ export const GoogleFormTriggerNode = memo((props: NodeProps) => {
 
     return (
         <>
-            <GoogleFormTriggerDialog
+            <StripeTriggerDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 webhookUrl={webhookUrl}
             />
             <BaseTriggerNode
                 {...props}
-                icon="/logos/google.svg"
-                name="When Google Form is submitted"
+                icon="/logos/stripe.svg"
+                name="When Stripe event is received"
                 description={truncatedUrl}
                 status={nodeStatus}
                 onSettings={handleOpenSettings}
@@ -44,4 +44,4 @@ export const GoogleFormTriggerNode = memo((props: NodeProps) => {
     );
 });
 
-GoogleFormTriggerNode.displayName = "GoogleFormTriggerNode";
+StripeTriggerNode.displayName = "StripeTriggerNode";

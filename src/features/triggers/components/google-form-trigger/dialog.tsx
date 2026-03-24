@@ -39,10 +39,14 @@ export const GoogleFormTriggerDialog = ({
 }: Props) => {
     const [copied, setCopied] = useState<"url" | "script" | null>(null);
 
-    const handleCopy = (text: string, type: "url" | "script") => {
-        navigator.clipboard.writeText(text);
-        setCopied(type);
-        setTimeout(() => setCopied(null), 2000);
+    const handleCopy = async (text: string, type: "url" | "script") => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(type);
+            setTimeout(() => setCopied(null), 2000);
+        } catch {
+            // Clipboard API not available
+        }
     };
 
     const scriptWithUrl = appsScript.replace("YOUR_WEBHOOK_URL", webhookUrl);
