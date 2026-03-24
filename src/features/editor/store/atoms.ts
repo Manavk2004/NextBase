@@ -5,3 +5,5 @@ import type { NodeStatus } from "@/components/react-flow/node-status-indicator"
 export const editoratom = atom<ReactFlowInstance | null>(null)
 
 export const nodeStatusMapAtom = atom<Record<string, NodeStatus>>({})
+
+export const workflowIdAtom = atom<string>("")

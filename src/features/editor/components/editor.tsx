@@ -2,7 +2,7 @@
 
 import { ErrorView, LoadingView } from "@/components/entity-components"
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows"
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Node, Edge, NodeChange, EdgeChange, Connection, Background, Controls, MiniMap, Panel } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { nodeComponents } from "@/config/node-components";
@@ -10,7 +10,7 @@ import { AddNodeButton } from "./add-node-button";
 import { ExecuteWorkflowButton } from "./execute-workflow-button";
 import { NodeType } from "@/generated/prisma/enums";
 import { useSetAtom } from "jotai";
-import { editoratom } from "../store/atoms";
+import { editoratom, workflowIdAtom } from "../store/atoms";
 import { useNodeStatusSubscription } from "@/features/executions/hooks/use-node-status";
 
 export const EditorLoading = () => {
@@ -28,6 +28,8 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
     const { data: workflow } = useSuspenseWorkflow(workflowId)
 
     const setEditor = useSetAtom(editoratom);
+    const setWorkflowId = useSetAtom(workflowIdAtom);
+    useEffect(() => { setWorkflowId(workflowId); }, [workflowId, setWorkflowId]);
     useNodeStatusSubscription(workflowId);
 
     const [nodes, setNodes] = useState<Node[]>(workflow.nodes);

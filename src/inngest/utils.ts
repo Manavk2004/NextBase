@@ -1,5 +1,32 @@
-import { Connection, Node } from "@/generated/prisma/models";
+import { ConnectionModel as Connection, NodeModel as Node } from "@/generated/prisma/models";
 import toposort from "toposort";
+
+export const getReachableNodeIds = (
+  triggerNodeId: string,
+  connections: Connection[],
+): Set<string> => {
+  const adjacency = new Map<string, string[]>();
+  for (const conn of connections) {
+    const neighbors = adjacency.get(conn.fromNodeId) || [];
+    neighbors.push(conn.toNodeId);
+    adjacency.set(conn.fromNodeId, neighbors);
+  }
+
+  const visited = new Set<string>();
+  const queue = [triggerNodeId];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (visited.has(current)) continue;
+    visited.add(current);
+    for (const neighbor of adjacency.get(current) || []) {
+      if (!visited.has(neighbor)) {
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return visited;
+};
 
 export const topologicalSort = (
   nodes: Node[],

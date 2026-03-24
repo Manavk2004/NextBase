@@ -3,7 +3,7 @@ import { inngest } from "./client";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
-import { topologicalSort } from "./utils";
+import { topologicalSort, getReachableNodeIds } from "./utils";
 import { NodeType } from "@/generated/prisma/enums";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
 import { workflowExecutionChannel } from "./channels";
@@ -44,6 +44,8 @@ export const executeWorkflow = inngest.createFunction(
       throw new NonRetriableError("Workflow ID is missing");
     }
 
+    const triggerNodeType = event.data.triggerNodeType as string | undefined;
+
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflow.findUniqueOrThrow({
         where: { id: workflowId },
@@ -53,7 +55,15 @@ export const executeWorkflow = inngest.createFunction(
         },
       });
 
-      return topologicalSort(workflow.nodes, workflow.connections);
+      const allSorted = topologicalSort(workflow.nodes, workflow.connections);
+
+      if (!triggerNodeType) return allSorted;
+
+      const triggerNode = workflow.nodes.find((n) => n.type === triggerNodeType);
+      if (!triggerNode) return allSorted;
+
+      const reachableIds = getReachableNodeIds(triggerNode.id, workflow.connections);
+      return allSorted.filter((n) => reachableIds.has(n.id));
     });
 
     // Initialize context with any initial data from the trigger

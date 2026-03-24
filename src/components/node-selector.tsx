@@ -24,6 +24,12 @@ const triggerNodes: NodeTypeOption[] = [
         label: "Trigger manually",
         description: "Runs the flow on clicking a button. Good for getting started quickly",
         icon: MousePointerIcon
+    },
+    {
+        type: NodeType.GOOGLE_FORM_TRIGGER,
+        label: "Google Form Trigger",
+        description: "Triggers the workflow when a Google Form is submitted",
+        icon: "/logos/google.svg"
     }
 ]
 
@@ -60,6 +66,18 @@ export function NodeSelector({
 
             if(Boolean(hasManualTrigger)){
                 toast.error("Only one manual trigger is allowed per workflow")
+                return
+            }
+        }
+
+        if(selection.type === NodeType.GOOGLE_FORM_TRIGGER){
+            const nodes = getNodes()
+            const hasGoogleFormTrigger = nodes.some(
+                (node) => node.type === NodeType.GOOGLE_FORM_TRIGGER
+            )
+
+            if(Boolean(hasGoogleFormTrigger)){
+                toast.error("Only one Google Form trigger is allowed per workflow")
                 return
             }
         }
@@ -129,6 +147,8 @@ export function NodeSelector({
                                         <Image
                                             src={Icon}
                                             alt={nodeType.label}
+                                            width={20}
+                                            height={20}
                                             className="size-5 object-contain rounded-sm"
                                         />
                                     ): 
@@ -163,6 +183,8 @@ export function NodeSelector({
                                         <Image
                                             src={Icon}
                                             alt={nodeType.label}
+                                            width={20}
+                                            height={20}
                                             className="size-5 object-contain rounded-sm"
                                         />
                                     ): 
