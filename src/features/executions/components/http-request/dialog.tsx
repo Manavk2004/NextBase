@@ -30,8 +30,10 @@ import { Button } from "@/components/ui/button";
 
 
 const formSchema = z.object({
-    endpoint: z.url({ message: "Plrease enter a valid URL"}),
+    variableName: z.string().min(1, { message: "Variable name is required" }).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, { message: "Must be a valid variable name (letters, numbers, underscores)" }),
+    endpoint: z.url({ message: "Please enter a valid URL"}),
     method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
+    contentType: z.enum(["application/json", "text/plain", "application/x-www-form-urlencoded"]).optional(),
     body: z.string().optional()
 })
 
@@ -56,17 +58,21 @@ export const HttpRequestDialog = ({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            variableName: defaultValues?.variableName || "",
             endpoint: defaultValues?.endpoint || "",
             method: defaultValues.method ?? "GET",
+            contentType: defaultValues?.contentType ?? "application/json",
             body: defaultValues.body || ""
         }
-    }) 
+    })
 
     useEffect(() => {
         if(open) {
             form.reset({
+                variableName: defaultValues?.variableName || "",
                 endpoint: defaultValues?.endpoint || "",
                 method: defaultValues?.method ?? "GET",
+                contentType: defaultValues?.contentType ?? "application/json",
                 body: defaultValues?.body || ""
             })
         }
@@ -96,13 +102,32 @@ export const HttpRequestDialog = ({
                     >
                         <FormField
                             control={form.control}
+                            name="variableName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Variable Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="httpResponse"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Unique name to reference this node&apos;s output (e.g. {`{{variableName.data}}`})
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
                             name="method"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Method</FormLabel>
                                     <Select
                                     onValueChange={field.onChange}
-                                    defaultValue={field.value}
+                                    value={field.value}
                                     >
                                         <FormControl>
                                             <SelectTrigger className="w-full">
@@ -124,6 +149,36 @@ export const HttpRequestDialog = ({
                                 </FormItem>
                             )}
                         />
+                        {showBodyField && (
+                            <FormField
+                                control={form.control}
+                                name="contentType"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Content-Type</FormLabel>
+                                        <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select content type"/>
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="application/json">application/json</SelectItem>
+                                                <SelectItem value="text/plain">text/plain</SelectItem>
+                                                <SelectItem value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</SelectItem>
+                                            </SelectContent>
+                                            <FormDescription>
+                                                The Content-Type header for the request body
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </Select>
+                                    </FormItem>
+                                )}
+                            />
+                        )}
                         <FormField
                             control={form.control}
                             name="endpoint"

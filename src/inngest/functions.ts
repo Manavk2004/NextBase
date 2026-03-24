@@ -56,11 +56,22 @@ export const executeWorkflow = inngest.createFunction(
     });
 
     // Initialize context with any initial data from the trigger
-    let context = event.data.initialData || {};
+    let context: Record<string, unknown> = event.data.initialData || {};
 
     // Execute each node
     for (const node of sortedNodes) {
       const executor = getExecutor(node.type as NodeType);
+
+      // Use the node's variableName (from node.data) as the context key
+      // This prevents key collisions when multiple nodes of the same type exist
+      const nodeData = (node.data as Record<string, unknown>) || {};
+      const variableName = (nodeData.variableName as string) || node.id;
+
+      // TODO: Actually invoke executor and store result
+      // const result = await step.run(`execute-node-${node.id}`, async () => {
+      //   return (executor as Function)(node, context);
+      // });
+      // context = { ...context, [variableName]: result };
     }
 
     return { sortedNodes };
