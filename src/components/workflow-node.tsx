@@ -1,6 +1,8 @@
 "use client"
 
 import { NodeToolbar, Position } from "@xyflow/react"
+import { showNodeDescriptionsAtom } from "@/features/editor/store/atoms"
+import { useAtomValue } from "jotai"
 import { SettingsIcon, TrashIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { Button } from "./ui/button"
@@ -23,6 +25,8 @@ export function WorkflowNode({
     name,
     description
 }: WorkflowNodeProps){
+    const showDescriptions = useAtomValue(showNodeDescriptionsAtom)
+
     return (
         <>
             {showToolbar && (
@@ -45,7 +49,7 @@ export function WorkflowNode({
                     <p className="font-medium">
                         {name}
                     </p>
-                    {description && (
+                    {showDescriptions && description && (
                         <p className="text-muted-foreground truncate text-sm">
                             {description}
                         </p>

@@ -47,6 +47,7 @@ export async function POST(
     data: {
       workflowId,
       triggerNodeType: "GOOGLE_FORM_TRIGGER",
+      userId: workflow.userId,
       initialData: { formData: body },
     },
   });

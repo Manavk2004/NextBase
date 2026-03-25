@@ -67,7 +67,10 @@ export const executeWorkflow = inngest.createFunction(
     });
 
     // Initialize context with any initial data from the trigger
-    let context: Record<string, unknown> = event.data.initialData || {};
+    let context: Record<string, unknown> = {
+      ...event.data.initialData || {},
+      __userId: event.data.userId,
+    };
 
     // Execute each node in topological order
     for (const node of sortedNodes) {

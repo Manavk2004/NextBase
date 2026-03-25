@@ -68,6 +68,7 @@ export async function POST(
     data: {
       workflowId,
       triggerNodeType: "STRIPE_TRIGGER",
+      userId: workflow.userId,
       initialData: { stripeEvent: event },
     },
   });

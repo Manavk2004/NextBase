@@ -13,6 +13,7 @@ const MODELS = [
 ]
 
 type GeminiPromptNodeData = {
+    credentialId?: string;
     variableName?: string;
     model?: string;
     systemPrompt?: string;
@@ -56,6 +57,7 @@ export const GeminiPromptNode = memo((props: NodeProps<GeminiPromptNodeType>) =>
                 description="Generate text using Google's Gemini models."
                 models={MODELS}
                 defaultModel="gemini-2.5-flash"
+                providerType="GOOGLE"
             />
             <BaseExecutionNode
                 {...props}

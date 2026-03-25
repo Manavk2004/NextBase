@@ -4,6 +4,7 @@ import { generateText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { getDecryptedApiKey } from "@/features/credentials/server/get-decrypted-key";
 
 export type NodeExecutorContext = Record<string, unknown>;
 
@@ -72,11 +73,22 @@ const geminiPromptExecutor: NodeExecutor = async (nodeData, context) => {
   const modelId = (nodeData.model as string) || "gemini-2.5-flash";
   const rawPrompt = (nodeData.prompt as string) || "";
   const rawSystemPrompt = (nodeData.systemPrompt as string) || "";
+  const credentialId = nodeData.credentialId as string | undefined;
 
   const prompt = interpolate(rawPrompt, context);
   const system = rawSystemPrompt ? interpolate(rawSystemPrompt, context) : undefined;
 
-  const google = createGoogleGenerativeAI();
+  const googleOptions: { apiKey?: string } = {};
+  if (credentialId) {
+    try {
+      const userId = context.__userId as string;
+      googleOptions.apiKey = await getDecryptedApiKey(credentialId, userId);
+    } catch (error) {
+      throw new Error(`Failed to retrieve Gemini API key: ${error instanceof Error ? error.message : "Credential may have been deleted or is inaccessible."}`);
+    }
+  }
+
+  const google = createGoogleGenerativeAI(googleOptions);
   const result = await generateText({
     model: google(modelId),
     system,
@@ -95,11 +107,22 @@ const openaiPromptExecutor: NodeExecutor = async (nodeData, context) => {
   const modelId = (nodeData.model as string) || "gpt-4o-mini";
   const rawPrompt = (nodeData.prompt as string) || "";
   const rawSystemPrompt = (nodeData.systemPrompt as string) || "";
+  const credentialId = nodeData.credentialId as string | undefined;
 
   const prompt = interpolate(rawPrompt, context);
   const system = rawSystemPrompt ? interpolate(rawSystemPrompt, context) : undefined;
 
-  const openai = createOpenAI();
+  const openaiOptions: { apiKey?: string } = {};
+  if (credentialId) {
+    try {
+      const userId = context.__userId as string;
+      openaiOptions.apiKey = await getDecryptedApiKey(credentialId, userId);
+    } catch (error) {
+      throw new Error(`Failed to retrieve OpenAI API key: ${error instanceof Error ? error.message : "Credential may have been deleted or is inaccessible."}`);
+    }
+  }
+
+  const openai = createOpenAI(openaiOptions);
   const result = await generateText({
     model: openai(modelId),
     system,
@@ -118,11 +141,22 @@ const anthropicPromptExecutor: NodeExecutor = async (nodeData, context) => {
   const modelId = (nodeData.model as string) || "claude-sonnet-4-5-20250929";
   const rawPrompt = (nodeData.prompt as string) || "";
   const rawSystemPrompt = (nodeData.systemPrompt as string) || "";
+  const credentialId = nodeData.credentialId as string | undefined;
 
   const prompt = interpolate(rawPrompt, context);
   const system = rawSystemPrompt ? interpolate(rawSystemPrompt, context) : undefined;
 
-  const anthropic = createAnthropic();
+  const anthropicOptions: { apiKey?: string } = {};
+  if (credentialId) {
+    try {
+      const userId = context.__userId as string;
+      anthropicOptions.apiKey = await getDecryptedApiKey(credentialId, userId);
+    } catch (error) {
+      throw new Error(`Failed to retrieve Anthropic API key: ${error instanceof Error ? error.message : "Credential may have been deleted or is inaccessible."}`);
+    }
+  }
+
+  const anthropic = createAnthropic(anthropicOptions);
   const result = await generateText({
     model: anthropic(modelId),
     system,

@@ -25,6 +25,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   workflows     Workflow[]
+  credentials   Credential[]
 
   @@unique([email])
   @@map("user")
@@ -89,6 +90,28 @@ model Workflow {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum CredentialType {
+  OPENAI
+  GOOGLE
+  ANTHROPIC
+}
+
+model Credential {
+  id              String         @id @default(cuid())
+  name            String
+  type            CredentialType
+  encryptedApiKey String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("credential")
 }
 
 enum NodeType {

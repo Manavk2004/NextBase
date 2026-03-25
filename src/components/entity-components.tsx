@@ -272,29 +272,30 @@ export function EntityList<T>({
 }
 
 
-interface EntityItemProps{
-    href: string;
+type EntityItemProps = {
     title: string;
     subtitle?: React.ReactNode;
     image?: React.ReactNode;
     actions?: React.ReactNode;
     onRemove?: () => void | Promise<void>;
     isRemoving?: boolean;
-    className?: string
-}
+    className?: string;
+} & (
+    | { href: string; onClick?: never }
+    | { onClick: () => void; href?: never }
+)
 
 export const EntityItem =({
-    href,
     title,
     subtitle,
     image,
     actions,
     onRemove,
     isRemoving,
-    className
+    className,
+    ...rest
 }: EntityItemProps ) => {
     const handleRemove = async (event: React.MouseEvent) => {
-        console.log("Inside handle remove", isRemoving)
         event.preventDefault();
         event.stopPropagation();
 
@@ -306,59 +307,72 @@ export const EntityItem =({
             await onRemove()
         }
     }
-    return(
-        <Link href={href} prefetch>
-            <Card
-                className={cn(
-                    "p-4 shadow-none hover:shadow cursor-pointer",
-                    isRemoving && "opacity-50 cursor-not-allowed",
-                    className
-                )}
-            >       
-                <CardContent className='flex flex-row items-center justify-between p-0'>
-                    <div className='flex items-center gap-3'>
-                        {image}
-                        <div>
-                            <CardTitle className='text-base font-medium'>
-                                {title}
-                            </CardTitle>
-                            {Boolean(subtitle) && (
-                                <CardDescription className='text-xs'>
-                                    {subtitle}
-                                </CardDescription>
-                            )}
-                        </div>
-                    </div>
-                    {(actions || onRemove && (
-                        <div className='flex gap-x-4 items-center'>
-                            {actions}
-                            {Boolean(onRemove) && (
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <MoreVerticalIcon className='size-4' />
 
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                        align='end'
+    const cardContent = (
+        <Card
+            className={cn(
+                "p-4 shadow-none hover:shadow cursor-pointer",
+                isRemoving && "opacity-50 cursor-not-allowed",
+                className
+            )}
+        >
+            <CardContent className='flex flex-row items-center justify-between p-0'>
+                <div className='flex items-center gap-3'>
+                    {image}
+                    <div>
+                        <CardTitle className='text-base font-medium'>
+                            {title}
+                        </CardTitle>
+                        {Boolean(subtitle) && (
+                            <CardDescription className='text-xs'>
+                                {subtitle}
+                            </CardDescription>
+                        )}
+                    </div>
+                </div>
+                {((actions || onRemove) && (
+                    <div className='flex gap-x-4 items-center'>
+                        {actions}
+                        {Boolean(onRemove) && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <DropdownMenuItem className='bg-white px-6 shadow-2xl flex gap-2 justify-center border-white border-2 hover:bg-gray-100 items-center rounded-sm py-2' onClick={handleRemove}>
-                                            <TrashIcon className='size-4'/>
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            )}
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-        </Link>
+                                        <MoreVerticalIcon className='size-4' />
+
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    align='end'
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <DropdownMenuItem className='bg-white px-6 shadow-2xl flex gap-2 justify-center border-white border-2 hover:bg-gray-100 items-center rounded-sm py-2' onClick={handleRemove}>
+                                        <TrashIcon className='size-4'/>
+                                        Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+    )
+
+    if('href' in rest && rest.href) {
+        return (
+            <Link href={rest.href} prefetch>
+                {cardContent}
+            </Link>
+        )
+    }
+
+    return (
+        <div onClick={'onClick' in rest ? rest.onClick : undefined}>
+            {cardContent}
+        </div>
     )
 }

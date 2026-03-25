@@ -23,10 +23,15 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { CredentialType } from "@/generated/prisma/enums";
+import Link from "next/link";
 
 export type ModelOption = { label: string; value: string };
 
 const formSchema = z.object({
+    credentialId: z.string().min(1, { message: "Credential is required" }),
     variableName: z.string()
         .min(1, { message: "Variable name is required" })
         .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, { message: "Must be a valid variable name (letters, numbers, underscores)" }),
@@ -44,6 +49,7 @@ interface Props {
     description: string;
     models: ModelOption[];
     defaultModel: string;
+    providerType: CredentialType;
 }
 
 export type AiPromptFormValues = z.infer<typeof formSchema>;
@@ -57,11 +63,17 @@ export const AiPromptDialog = ({
     description,
     models,
     defaultModel,
+    providerType,
 }: Props) => {
+    const trpc = useTRPC();
+    const credentialsQuery = useQuery(
+        trpc.credentials.getByType.queryOptions({ type: providerType })
+    );
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            credentialId: defaultValues?.credentialId || "",
             variableName: defaultValues?.variableName || "",
             model: defaultValues?.model || defaultModel,
             systemPrompt: defaultValues?.systemPrompt || "",
@@ -72,6 +84,7 @@ export const AiPromptDialog = ({
     useEffect(() => {
         if (open) {
             form.reset({
+                credentialId: defaultValues?.credentialId || "",
                 variableName: defaultValues?.variableName || "",
                 model: defaultValues?.model || defaultModel,
                 systemPrompt: defaultValues?.systemPrompt || "",
@@ -97,6 +110,48 @@ export const AiPromptDialog = ({
                         onSubmit={form.handleSubmit(handleSubmit)}
                         className="space-y-8 mt-4"
                     >
+                        <FormField
+                            control={form.control}
+                            name="credentialId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Credential</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder={
+                                                    credentialsQuery.isLoading
+                                                        ? "Loading credentials..."
+                                                        : "Select a credential"
+                                                } />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {credentialsQuery.data?.length === 0 && (
+                                                <div className="px-3 py-2 text-sm text-muted-foreground">
+                                                    No credentials found.{" "}
+                                                    <Link href="/credentials" className="underline text-primary">
+                                                        Add one
+                                                    </Link>
+                                                </div>
+                                            )}
+                                            {credentialsQuery.data?.map((cred) => (
+                                                <SelectItem key={cred.id} value={cred.id}>
+                                                    {cred.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                        Select an API key. <Link href="/credentials" className="underline">Manage credentials</Link>
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="variableName"

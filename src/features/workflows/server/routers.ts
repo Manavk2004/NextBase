@@ -29,7 +29,7 @@ export const workflowsRouter = createTRPCRouter({
 
             await inngest.send({
                 name: "workflows/execute.workflow",
-                data: { workflowId: input.id, triggerNodeType: "MANUAL_TRIGGER" },
+                data: { workflowId: input.id, triggerNodeType: "MANUAL_TRIGGER", userId: ctx.auth.user.id },
             });
 
             return workflow;

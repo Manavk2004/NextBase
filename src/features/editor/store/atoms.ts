@@ -7,3 +7,5 @@ export const editoratom = atom<ReactFlowInstance | null>(null)
 export const nodeStatusMapAtom = atom<Record<string, NodeStatus>>({})
 
 export const workflowIdAtom = atom<string>("")
+
+export const showNodeDescriptionsAtom = atom<boolean>(true)
