@@ -57,29 +57,26 @@ export const BaseTriggerNode = memo(
                 onDelete={handleDelete}
                 onSettings={onSettings}
             >
-                <div className="relative">
-                    <NodeStatusIndicator
-                        status={status}
-                        variant="border"
-                        className="rounded-l-2xl"
-                    >
-                        <BaseNode status={status} onDoubleClick={onDoubleClick} className="rounded-l-2xl relative group">
-                            <BaseNodeContent>
-                                {typeof Icon === "string" ? (
-                                    <Image src={Icon} alt={name} width={16} height={16} />
-                                ): (
-                                    <Icon className="size-4 text-muted-foreground" />
-                                )}
-                                {children}
-                                <BaseHandle
-                                    id="source-1"
-                                    type="source"
-                                    position={Position.Right}
-                                />
-                            </BaseNodeContent>
-                        </BaseNode>
-                    </NodeStatusIndicator>
-                </div>
+                <NodeStatusIndicator
+                    status={status}
+                    variant="border"
+                >
+                    <BaseNode status={status} onDoubleClick={onDoubleClick}>
+                        <BaseNodeContent>
+                            {typeof Icon === "string" ? (
+                                <Image src={Icon} alt={name} width={16} height={16} unoptimized />
+                            ): (
+                                <Icon className="size-4 text-muted-foreground" />
+                            )}
+                            {children}
+                            <BaseHandle
+                                id="source-1"
+                                type="source"
+                                position={Position.Right}
+                            />
+                        </BaseNodeContent>
+                    </BaseNode>
+                </NodeStatusIndicator>
             </WorkflowNode>
         )
     }

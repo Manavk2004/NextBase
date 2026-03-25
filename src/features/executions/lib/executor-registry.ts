@@ -1,5 +1,9 @@
 import { NodeType } from "@/generated/prisma/enums";
 import { interpolate } from "./template";
+import { generateText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 
 export type NodeExecutorContext = Record<string, unknown>;
 
@@ -64,12 +68,84 @@ const httpRequestExecutor: NodeExecutor = async (nodeData, context) => {
   };
 };
 
+const geminiPromptExecutor: NodeExecutor = async (nodeData, context) => {
+  const modelId = (nodeData.model as string) || "gemini-2.5-flash";
+  const rawPrompt = (nodeData.prompt as string) || "";
+  const rawSystemPrompt = (nodeData.systemPrompt as string) || "";
+
+  const prompt = interpolate(rawPrompt, context);
+  const system = rawSystemPrompt ? interpolate(rawSystemPrompt, context) : undefined;
+
+  const google = createGoogleGenerativeAI();
+  const result = await generateText({
+    model: google(modelId),
+    system,
+    prompt,
+  });
+
+  return {
+    text: result.text,
+    usage: result.usage,
+    model: modelId,
+    provider: "google",
+  };
+};
+
+const openaiPromptExecutor: NodeExecutor = async (nodeData, context) => {
+  const modelId = (nodeData.model as string) || "gpt-4o-mini";
+  const rawPrompt = (nodeData.prompt as string) || "";
+  const rawSystemPrompt = (nodeData.systemPrompt as string) || "";
+
+  const prompt = interpolate(rawPrompt, context);
+  const system = rawSystemPrompt ? interpolate(rawSystemPrompt, context) : undefined;
+
+  const openai = createOpenAI();
+  const result = await generateText({
+    model: openai(modelId),
+    system,
+    prompt,
+  });
+
+  return {
+    text: result.text,
+    usage: result.usage,
+    model: modelId,
+    provider: "openai",
+  };
+};
+
+const anthropicPromptExecutor: NodeExecutor = async (nodeData, context) => {
+  const modelId = (nodeData.model as string) || "claude-sonnet-4-5-20250929";
+  const rawPrompt = (nodeData.prompt as string) || "";
+  const rawSystemPrompt = (nodeData.systemPrompt as string) || "";
+
+  const prompt = interpolate(rawPrompt, context);
+  const system = rawSystemPrompt ? interpolate(rawSystemPrompt, context) : undefined;
+
+  const anthropic = createAnthropic();
+  const result = await generateText({
+    model: anthropic(modelId),
+    system,
+    prompt,
+  });
+
+  return {
+    text: result.text,
+    usage: result.usage,
+    model: modelId,
+    provider: "anthropic",
+  };
+};
+
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
   [NodeType.GOOGLE_FORM_TRIGGER]: googleFormTriggerExecutor,
   [NodeType.STRIPE_TRIGGER]: stripeTriggerExecutor,
   [NodeType.INITIAL]: initialExecutor,
   [NodeType.HTTP_REQUEST]: httpRequestExecutor,
+  [NodeType.GEMINI_PROMPT]: geminiPromptExecutor,
+  [NodeType.OPENAI_PROMPT]: openaiPromptExecutor,
+  [NodeType.ANTHROPIC_PROMPT]: anthropicPromptExecutor,
 };
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

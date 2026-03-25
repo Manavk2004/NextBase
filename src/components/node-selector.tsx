@@ -45,6 +45,24 @@ const executionNodes: NodeTypeOption[]= [
         label: "HTTP Request",
         description: "Makes an HTTP request",
         icon: GlobeIcon
+    },
+    {
+        type: NodeType.GEMINI_PROMPT,
+        label: "Gemini Prompt",
+        description: "Generate text using Google Gemini",
+        icon: "/logos/gemini-ai.svg"
+    },
+    {
+        type: NodeType.OPENAI_PROMPT,
+        label: "OpenAI Prompt",
+        description: "Generate text using OpenAI GPT models",
+        icon: "/logos/openai.svg"
+    },
+    {
+        type: NodeType.ANTHROPIC_PROMPT,
+        label: "Claude Prompt",
+        description: "Generate text using Anthropic Claude",
+        icon: "/logos/anthropic.svg"
     }
 ]
 
