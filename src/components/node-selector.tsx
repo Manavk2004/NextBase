@@ -63,6 +63,18 @@ const executionNodes: NodeTypeOption[]= [
         label: "Claude Prompt",
         description: "Generate text using Anthropic Claude",
         icon: "/logos/anthropic.svg"
+    },
+    {
+        type: NodeType.DISCORD_MESSAGE,
+        label: "Discord Message",
+        description: "Send a message to a Discord channel",
+        icon: "/logos/discord.svg"
+    },
+    {
+        type: NodeType.SLACK_MESSAGE,
+        label: "Slack Message",
+        description: "Send a message to a Slack channel",
+        icon: "/logos/slack.svg"
     }
 ]
 

@@ -8,6 +8,8 @@ import { StripeTriggerNode } from "@/features/triggers/components/stripe-trigger
 import { GeminiPromptNode } from "@/features/executions/components/gemini-prompt/node";
 import { OpenaiPromptNode } from "@/features/executions/components/openai-prompt/node";
 import { AnthropicPromptNode } from "@/features/executions/components/anthropic-prompt/node";
+import { DiscordMessageNode } from "@/features/executions/components/discord-message/node";
+import { SlackMessageNode } from "@/features/executions/components/slack-message/node";
 
 
 export const nodeComponents = {
@@ -16,6 +18,8 @@ export const nodeComponents = {
     [NodeType.GEMINI_PROMPT]: GeminiPromptNode,
     [NodeType.OPENAI_PROMPT]: OpenaiPromptNode,
     [NodeType.ANTHROPIC_PROMPT]: AnthropicPromptNode,
+    [NodeType.DISCORD_MESSAGE]: DiscordMessageNode,
+    [NodeType.SLACK_MESSAGE]: SlackMessageNode,
     [NodeType.MANUAL_TRIGGER]: ManualTriggerNode,
     [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTriggerNode,
     [NodeType.STRIPE_TRIGGER]: StripeTriggerNode

@@ -35,6 +35,8 @@ const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
   OPENAI: "OpenAI",
   GOOGLE: "Google / Gemini",
   ANTHROPIC: "Anthropic",
+  DISCORD: "Discord",
+  SLACK: "Slack",
 };
 
 export const CredentialsSearch = () => {

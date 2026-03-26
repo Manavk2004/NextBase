@@ -6,6 +6,8 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { getDecryptedApiKey } from "@/features/credentials/server/get-decrypted-key";
 
+
+
 export type NodeExecutorContext = Record<string, unknown>;
 
 export type NodeExecutor = (
@@ -171,15 +173,108 @@ const anthropicPromptExecutor: NodeExecutor = async (nodeData, context) => {
   };
 };
 
+const discordTriggerExecutor: NodeExecutor = async (_nodeData, context) => {
+  return { triggered: true, discordEvent: context.discordEvent ?? {} };
+};
+
+const slackTriggerExecutor: NodeExecutor = async (_nodeData, context) => {
+  return { triggered: true, slackEvent: context.slackEvent ?? {} };
+};
+
+const discordMessageExecutor: NodeExecutor = async (nodeData, context) => {
+  const credentialId = nodeData.credentialId as string | undefined;
+  const rawMessage = (nodeData.message as string) || "";
+  const username = (nodeData.username as string) || undefined;
+
+  const message = interpolate(rawMessage, context);
+
+  if (!credentialId) {
+    throw new Error("Discord webhook credential is required");
+  }
+
+  const userId = context.__userId as string;
+  if (!userId) {
+    throw new Error("User context is required for Discord message execution");
+  }
+  let webhookUrl: string;
+  try {
+    webhookUrl = await getDecryptedApiKey(credentialId, userId);
+  } catch (error) {
+    throw new Error(`Failed to retrieve Discord webhook URL: ${error instanceof Error ? error.message : "Credential may have been deleted or is inaccessible."}`);
+  }
+
+  const payload: Record<string, string> = { content: message };
+  if (username) payload.username = username;
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    success: response.ok,
+  };
+};
+
+const slackMessageExecutor: NodeExecutor = async (nodeData, context) => {
+  const credentialId = nodeData.credentialId as string | undefined;
+  const rawMessage = (nodeData.message as string) || "";
+  const channel = (nodeData.channel as string) || undefined;
+  const username = (nodeData.username as string) || undefined;
+
+  const message = interpolate(rawMessage, context);
+
+  if (!credentialId) {
+    throw new Error("Slack webhook credential is required");
+  }
+
+  const userId = context.__userId as string;
+  if (!userId) {
+    throw new Error("User context is required for Slack message execution");
+  }
+  let webhookUrl: string;
+  try {
+    webhookUrl = await getDecryptedApiKey(credentialId, userId);
+  } catch (error) {
+    throw new Error(`Failed to retrieve Slack webhook URL: ${error instanceof Error ? error.message : "Credential may have been deleted or is inaccessible."}`);
+  }
+
+  const payload: Record<string, string> = { text: message };
+  if (channel) payload.channel = channel;
+  if (username) payload.username = username;
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const responseText = await response.text();
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    success: response.ok,
+    response: responseText,
+  };
+};
+
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
   [NodeType.GOOGLE_FORM_TRIGGER]: googleFormTriggerExecutor,
   [NodeType.STRIPE_TRIGGER]: stripeTriggerExecutor,
+  [NodeType.DISCORD_TRIGGER]: discordTriggerExecutor,
+  [NodeType.SLACK_TRIGGER]: slackTriggerExecutor,
   [NodeType.INITIAL]: initialExecutor,
   [NodeType.HTTP_REQUEST]: httpRequestExecutor,
   [NodeType.GEMINI_PROMPT]: geminiPromptExecutor,
   [NodeType.OPENAI_PROMPT]: openaiPromptExecutor,
   [NodeType.ANTHROPIC_PROMPT]: anthropicPromptExecutor,
+  [NodeType.DISCORD_MESSAGE]: discordMessageExecutor,
+  [NodeType.SLACK_MESSAGE]: slackMessageExecutor,
 };
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

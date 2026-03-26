@@ -43,7 +43,7 @@ const AppSidebar = () => {
                 <SidebarMenuButton asChild className="gap-x-4 h-10 px-4">
                     <Link href="/" prefetch>
                         <Image src="/logos/logo.svg" alt="nextbase" width={30} height={30}/>
-                        <span className="font-semibold text-sm">Nodebase</span>
+                        <span className="font-semibold text-sm">Nextbase</span>
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>

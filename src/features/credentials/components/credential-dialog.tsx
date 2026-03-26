@@ -40,6 +40,8 @@ const CREDENTIAL_TYPES = [
   { label: "OpenAI", value: "OPENAI" },
   { label: "Google / Gemini", value: "GOOGLE" },
   { label: "Anthropic", value: "ANTHROPIC" },
+  { label: "Discord (Webhook URL)", value: "DISCORD" },
+  { label: "Slack (Webhook URL)", value: "SLACK" },
 ] as const;
 
 const formSchema = z.object({
@@ -119,6 +121,9 @@ export const CredentialDialog = ({
 
   const isPending = createCredential.isPending || updateCredential.isPending;
 
+  const watchType = form.watch("type");
+  const isWebhookType = watchType === "DISCORD" || watchType === "SLACK";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -128,7 +133,9 @@ export const CredentialDialog = ({
           </DialogTitle>
           <DialogDescription>
             {mode === "create"
-              ? "Store an API key for an AI provider."
+              ? isWebhookType
+                ? "Store a webhook URL for an integration."
+                : "Store an API key for an AI provider."
               : "Update your credential details."}
           </DialogDescription>
         </DialogHeader>
@@ -186,22 +193,32 @@ export const CredentialDialog = ({
               name="apiKey"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>API Key</FormLabel>
+                  <FormLabel>{isWebhookType ? "Webhook URL" : "API Key"}</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
                       placeholder={
                         mode === "edit"
-                          ? "Leave blank to keep existing key"
-                          : "sk-..."
+                          ? isWebhookType
+                            ? "Leave blank to keep existing URL"
+                            : "Leave blank to keep existing key"
+                          : watchType === "DISCORD"
+                            ? "https://discord.com/api/webhooks/..."
+                            : watchType === "SLACK"
+                              ? "https://hooks.slack.com/services/..."
+                              : "sk-..."
                       }
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
                     {mode === "edit"
-                      ? "Only fill this in if you want to replace the existing key"
-                      : "Your API key will be encrypted before storage"}
+                      ? isWebhookType
+                        ? "Only fill this in if you want to replace the existing URL"
+                        : "Only fill this in if you want to replace the existing key"
+                      : isWebhookType
+                        ? "Your webhook URL will be encrypted before storage"
+                        : "Your API key will be encrypted before storage"}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
