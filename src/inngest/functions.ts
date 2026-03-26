@@ -45,6 +45,23 @@ export const executeWorkflow = inngest.createFunction(
     }
 
     const triggerNodeType = event.data.triggerNodeType as string | undefined;
+    const userId = event.data.userId;
+
+    if (typeof userId !== "string" || !userId) {
+      throw new NonRetriableError("User ID is missing or invalid");
+    }
+
+    // Create execution record
+    const execution = await step.run("create-execution", async () => {
+      return prisma.execution.create({
+        data: {
+          workflowId,
+          userId,
+          status: "RUNNING",
+          trigger: triggerNodeType || "MANUAL_TRIGGER",
+        },
+      });
+    });
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflow.findUniqueOrThrow({
@@ -69,14 +86,27 @@ export const executeWorkflow = inngest.createFunction(
     // Initialize context with any initial data from the trigger
     let context: Record<string, unknown> = {
       ...event.data.initialData || {},
-      __userId: event.data.userId,
+      __userId: userId,
     };
+
+    // Track per-node results
+    const nodeResults: Array<{
+      nodeId: string;
+      nodeName: string;
+      nodeType: string;
+      status: "success" | "error";
+      result?: unknown;
+      error?: string;
+      startedAt: string;
+      completedAt: string;
+    }> = [];
 
     // Execute each node in topological order
     for (const node of sortedNodes) {
       const executor = getExecutor(node.type as NodeType);
       const nodeData = (node.data as Record<string, unknown>) || {};
       const variableName = (nodeData.variableName as string) || node.id;
+      const nodeStartedAt = new Date().toISOString();
 
       await step.run(`publish-loading-${node.id}`, async () => {
         await publish(
@@ -94,6 +124,24 @@ export const executeWorkflow = inngest.createFunction(
 
         context = { ...context, [variableName]: result };
 
+        nodeResults.push({
+          nodeId: node.id,
+          nodeName: node.name,
+          nodeType: node.type,
+          status: "success",
+          result,
+          startedAt: nodeStartedAt,
+          completedAt: new Date().toISOString(),
+        });
+
+        // Save node results incrementally
+        await step.run(`save-node-result-${node.id}`, async () => {
+          await prisma.execution.update({
+            where: { id: execution.id },
+            data: { nodeResults: nodeResults as unknown as [] },
+          });
+        });
+
         await step.run(`publish-success-${node.id}`, async () => {
           await publish(
             workflowExecutionChannel(workflowId)["node-status"]({
@@ -103,6 +151,29 @@ export const executeWorkflow = inngest.createFunction(
           );
         });
       } catch (error) {
+        nodeResults.push({
+          nodeId: node.id,
+          nodeName: node.name,
+          nodeType: node.type,
+          status: "error",
+          error: error instanceof Error ? error.message : String(error),
+          startedAt: nodeStartedAt,
+          completedAt: new Date().toISOString(),
+        });
+
+        // Mark execution as failed with node results
+        await step.run("mark-execution-error", async () => {
+          await prisma.execution.update({
+            where: { id: execution.id },
+            data: {
+              status: "ERROR",
+              error: error instanceof Error ? error.message : String(error),
+              nodeResults: nodeResults as unknown as [],
+              completedAt: new Date(),
+            },
+          });
+        });
+
         await step.run(`publish-error-${node.id}`, async () => {
           await publish(
             workflowExecutionChannel(workflowId)["node-status"]({
@@ -116,6 +187,18 @@ export const executeWorkflow = inngest.createFunction(
         );
       }
     }
+
+    // Mark execution as successful
+    await step.run("mark-execution-success", async () => {
+      await prisma.execution.update({
+        where: { id: execution.id },
+        data: {
+          status: "SUCCESS",
+          nodeResults: nodeResults as unknown as [],
+          completedAt: new Date(),
+        },
+      });
+    });
 
     return { context };
   },

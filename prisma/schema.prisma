@@ -26,6 +26,7 @@ model User {
   accounts      Account[]
   workflows     Workflow[]
   credentials   Credential[]
+  executions    Execution[]
 
   @@unique([email])
   @@map("user")
@@ -87,9 +88,34 @@ model Workflow {
 
   nodes       Node[]
   connections Connection[]
+  executions  Execution[]
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ExecutionStatus {
+  RUNNING
+  SUCCESS
+  ERROR
+}
+
+model Execution {
+  id          String          @id @default(cuid())
+  workflowId  String
+  workflow    Workflow         @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      ExecutionStatus @default(RUNNING)
+  trigger     String?
+  error       String?
+  nodeResults Json            @default("[]")
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  @@index([workflowId])
+  @@index([userId])
+  @@map("execution")
 }
 
 enum CredentialType {
