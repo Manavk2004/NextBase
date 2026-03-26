@@ -70,6 +70,7 @@ export function LoginForm(){
                                         className="w-full"
                                         type="button"
                                         disabled={isPending}
+                                        onClick={() => authClient.signIn.social({ provider: "github", callbackURL: "/" })}
                                     >
                                         <Image alt="Github" src="/logos/github.svg" width={20} height={20} />
                                         Continue with GitHub
@@ -79,6 +80,7 @@ export function LoginForm(){
                                         className="w-full"
                                         type="button"
                                         disabled={isPending}
+                                        onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
                                     >
                                         <Image alt="Google" src="/logos/google.svg" width={20} height={20} />
                                         Continue with Google
