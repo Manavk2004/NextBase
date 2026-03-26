@@ -14,7 +14,6 @@
     "@ai-sdk/anthropic": "^3.0.64",
     "@ai-sdk/google": "^3.0.53",
     "@ai-sdk/openai": "^3.0.48",
-    "@better-auth/infra": "^0.1.13",
     "@hookform/resolvers": "^5.2.2",
     "@inngest/realtime": "^0.4.6",
     "@paralleldrive/cuid2": "^3.0.6",
