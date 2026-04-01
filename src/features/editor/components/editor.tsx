@@ -8,7 +8,7 @@ import '@xyflow/react/dist/style.css';
 import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "./add-node-button";
 import { ExecuteWorkflowButton } from "./execute-workflow-button";
-import { NodeType } from "@/generated/prisma/enums";
+import { NodeType } from "@prisma/client";
 import { useSetAtom } from "jotai";
 import { editoratom, workflowIdAtom } from "../store/atoms";
 import { useNodeStatusSubscription } from "@/features/executions/hooks/use-node-status";

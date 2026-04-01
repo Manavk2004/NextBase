@@ -21,7 +21,7 @@ import { KeyIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { CredentialDialog } from "./credential-dialog";
-import { CredentialType } from "@/generated/prisma/enums";
+import { CredentialType } from "@prisma/client";
 
 type CredentialListItem = {
   id: string;

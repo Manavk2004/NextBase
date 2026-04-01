@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/db";
-import { NodeType } from "@/generated/prisma/enums";
+import { NodeType } from "@prisma/client";
 import { inngest } from "@/inngest/client";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);

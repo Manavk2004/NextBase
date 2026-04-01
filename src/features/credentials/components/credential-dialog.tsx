@@ -34,7 +34,7 @@ import {
   useCreateCredential,
   useUpdateCredential,
 } from "../hooks/use-credentials";
-import { CredentialType } from "@/generated/prisma/enums";
+import { CredentialType } from "@prisma/client";
 
 const CREDENTIAL_TYPES = [
   { label: "OpenAI", value: "OPENAI" },

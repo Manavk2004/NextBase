@@ -1,4 +1,4 @@
-import { NodeType } from "@/generated/prisma/enums";
+import { NodeType } from "@prisma/client";
 import { interpolate } from "./template";
 import { generateText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";

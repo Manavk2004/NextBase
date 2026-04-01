@@ -19,7 +19,7 @@ import { useExecutionsParams } from "../hooks/use-executions-params";
 import { useEntitySearch } from "@/hooks/use-entity-search";
 import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { ExecutionStatus } from "@/generated/prisma/enums";
+import { ExecutionStatus } from "@prisma/client";
 
 type ExecutionListItem = {
   id: string;

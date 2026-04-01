@@ -1,4 +1,4 @@
-import { ConnectionModel as Connection, NodeModel as Node } from "@/generated/prisma/models";
+import type { Connection, Node } from "@prisma/client";
 import toposort from "toposort";
 
 export const getReachableNodeIds = (
